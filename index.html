@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Chimera: Compositional Image Generation using Part-based Concepting">
+  <meta name="keywords" content="Chimera, Image Generation, Personalization, AI, Computer Vision">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chimera: Compositional Image Generation </title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4F46E5',
+            secondary: '#10B981',
+            dark: '#1F2937',
+            light: '#F9FAFB',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Georgia', 'serif'],
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'fade-in': 'fadeIn 1s ease-in',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    .gradient-text {
+      background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .paper-card {
+      background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .paper-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-link {
+      position: relative;
+    }
+
+    .nav-link:after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background-color: #4F46E5;
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover:after {
+      width: 100%;
+    }
+
+    .author-chip {
+      background-color: rgba(79, 70, 229, 0.1);
+      color: #4F46E5;
+      transition: all 0.3s ease;
+    }
+
+    .author-chip:hover {
+      background-color: rgba(79, 70, 229, 0.2);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-light text-dark">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm py-4 sticky top-0 z-50">
+    <div class="container mx-auto px-6 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+          <span class="text-white font-bold">C</span>
+        </div>
+        <span class="font-bold text-xl">Chimera</span>
+      </div>
+      <div class="hidden md:flex space-x-8">
+        <a href="#abstract" class="nav-link font-medium">Abstract</a>
+        <a href="#method" class="nav-link font-medium">Method</a>
+        <a href="#results" class="nav-link font-medium">Results</a>
+        <a href="#bibtex" class="nav-link font-medium">BibTeX</a>
+      </div>
+      <button class="md:hidden text-gray-600">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="py-16 md:py-24 bg-gradient-to-br from-blue-50 to-green-50">
+    <div class="container mx-auto px-6">
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6">
+          <span class="gradient-text">Chimera</span>
+        </h1>
+        <h2 class="text-xl md:text-2xl font-medium text-gray-600 mb-8">
+          Compositional Image Generation using Part-Based Concepting
+        </h2>
+
+        <div class="flex flex-wrap justify-center gap-4 mb-6">
+          <a href="https://scholar.google.com/citations?user=wT13mC4AAAAJ">
+            <div class="author-chip px-4 py-2 rounded-full text-sm font-medium flex items-center">
+              <img src="https://ui-avatars.com/api/?name=Shivam+Singh&background=4F46E5&color=fff"
+                class="w-6 h-6 rounded-full mr-2">
+              <span class="hover:underline">
+                Shivam Singh*<sup>1</sup>
+              </span>
+            </div>
+          </a>
+          <a href="https://spectraorder.github.io">
+            <div class="author-chip px-4 py-2 rounded-full text-sm font-medium flex items-center">
+              <img src="https://ui-avatars.com/api/?name=Yiming+Chen&background=4F46E5&color=fff"
+                class="w-6 h-6 rounded-full mr-2">
+              <span class="hover:underline">
+                Yiming Chen*<sup>2</sup>
+              </span>
+            </div>
+          </a>
+          <a href="https://agneetchatterjee.com">
+            <div class="author-chip px-4 py-2 rounded-full text-sm font-medium flex items-center">
+              <img src="https://ui-avatars.com/api/?name=Agneet+Chatterjee&background=4F46E5&color=fff"
+                class="w-6 h-6 rounded-full mr-2">
+              <span class="hover:underline">
+                Agneet Chatterjee<sup>1</sup>
+              </span>
+            </div>
+          </a>
+          <a href="https://scholar.google.com/citations?user=JVumcGEAAAAJ&hl=en">
+            <div class="author-chip px-4 py-2 rounded-full text-sm font-medium flex items-center">
+              <img src="https://ui-avatars.com/api/?name=Amit+Raj&background=4F46E5&color=fff"
+                class="w-6 h-6 rounded-full mr-2">
+              <span class="hover:underline">
+                Amit Raj<sup>3</sup>
+              </span>
+            </div>
+          </a>
+          <a href="https://scholar.google.com/citations?user=vjZrDKQAAAAJ&hl=en">
+            <div class="author-chip px-4 py-2 rounded-full text-sm font-medium flex items-center">
+              <img src="https://ui-avatars.com/api/?name=James+Hays&background=4F46E5&color=fff"
+                class="w-6 h-6 rounded-full mr-2">
+              <span class="hover:underline">
+                James Hays<sup>2</sup>
+              </span>
+            </div>
+          </a>
+          <a href="https://faculty.engineering.asu.edu/yezhouyang/">
+            <div class="author-chip px-4 py-2 rounded-full text-sm font-medium flex items-center">
+              <img src="https://ui-avatars.com/api/?name=Yezhou+Yang&background=4F46E5&color=fff"
+                class="w-6 h-6 rounded-full mr-2">
+              <span class="hover:underline">
+                Yezhou Yang<sup>1</sup>
+              </span>
+            </div>
+          </a>
+          <a href="https://scholar.google.com/citations?user=9Yd716IAAAAJ&hl=en">
+            <div class="author-chip px-4 py-2 rounded-full text-sm font-medium flex items-center">
+              <img src="https://ui-avatars.com/api/?name=Chitta+Baral&background=4F46E5&color=fff"
+                class="w-6 h-6 rounded-full mr-2">
+              <span class="hover:underline">
+                Chitta Baral<sup>1</sup>
+              </span>
+            </div>
+          </a>
+        </div>
+        
+        <!-- Institutions line -->
+        <div class="flex flex-wrap justify-center gap-6 text-gray-500 mb-8 text-sm">
+          <div><sup>1</sup> Arizona State University</div>
+          <div><sup>2</sup> Georgia Institute of Technology</div>
+          <div><sup>3</sup> Google Deepmind</div>
+        </div>
+        
+
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="#" class="paper-card px-6 py-3 rounded-lg flex items-center">
+            <i class="fas fa-file-pdf text-primary mr-2"></i>
+            <span>Paper</span>
+          </a>
+          <a href="#" class="paper-card px-6 py-3 rounded-lg flex items-center">
+            <i class="fas fa-book text-primary mr-2"></i>
+            <span>arXiv</span>
+          </a>
+          <a href="#" class="paper-card px-6 py-3 rounded-lg flex items-center">
+            <i class="fas fa-code text-primary mr-2"></i>
+            <span>Code</span>
+          </a>
+          <a href="#" class="paper-card px-6 py-3 rounded-lg flex items-center">
+            <i class="fas fa-play text-primary mr-2"></i>
+            <span>Demo</span>
+          </a>
+          <a href="#" class="paper-card px-6 py-3 rounded-lg flex items-center">
+            <i class="fas fa-database text-primary mr-2"></i>
+            <span>Data</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Teaser Section -->
+  <section class="py-16 bg-white" id="teaser">
+    <div class="container mx-auto px-6">
+      <div class="max-w-5xl mx-auto">
+        <div class="paper-card p-6 rounded-xl">
+          <img src="./static/images/teaser-figure.drawio.png" alt="Evaluation Results"
+            class="rounded-lg w-full h-auto shadow-md">
+          <div class="mt-4 text-gray-600">
+            <span class="font-bold text-primary">Figure 1:</span> Part-aware composition with Chimera: the model takes
+            input images along with their specified part prompts (e.g., “head
+            of a lion,” “body of a horse”) and generates a new entity that combines these parts into a coherent output.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Abstract Section -->
+  <section class="py-16 bg-gray-50" id="abstract">
+    <div class="container mx-auto px-6">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-3xl font-bold mb-8 text-center">
+          <span class="border-b-4 border-primary pb-2">Abstract</span>
+        </h2>
+        <div class="paper-card p-8 rounded-xl">
+          <p class="text-gray-700 leading-relaxed">
+            Personalized image generative models are highly proficient at synthesizing images from text or a single
+            image, yet they
+            lack explicit control for composing objects from specific parts of multiple source images without user
+            specified masks
+            or annotations. To address this, we introduce Chimera, a personalized image generation model that generates
+            novel
+            objects by combining specified parts from different source images according to textual instructions.
+            To train our model, we first construct a dataset from a taxonomy built on 464 unique ({part},
+            {subject}) pairs, which we term semantic atoms. From this, we generate 37k prompts and synthesize the
+            corresponding images with a high-fidelity text-to-image model.
+            We train a custom diffusion prior model with part-conditional guidance, which steers the image-conditioning
+            features to
+            enforce both semantic identity and spatial layout. We also introduce an objective metric \textit{PartEval}
+            to assess the
+            fidelity and compositional accuracy of generation pipelines. Human evaluations and our proposed metric show
+            that Chimera
+            outperforms other baselines by 14% in part alignment and compositional accuracy and 21% in visual quality
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Method Section -->
+  <section class="py-16 bg-white" id="method">
+    <div class="container mx-auto px-6">
+      <div class="max-w-5xl mx-auto">
+        <h2 class="text-3xl font-bold mb-8 text-center">
+          <span class="border-b-4 border-secondary pb-2">Method</span>
+        </h2>
+
+        <div class="paper-card p-6 rounded-xl mb-12">
+          <img src="./static/images/model-pipeline.drawio.png" alt="Model pipeline"
+            class="rounded-lg w-full h-auto shadow-md">
+          <div class="mt-4 text-gray-600">
+            <span class="font-bold text-primary">Figure 2:</span>An overview of our generation pipeline. User inputs are
+            processed by Grounded-Segment-Anything (SAMv2) to produce
+            segmented images, which are then encoded into the IP+ embedding space. This embedding conditions our
+            finetuned PiT
+            model, acting as a rectified flow prior, to generate a target latent that is subsequently rendered into the
+            final image
+            by the SDXL decoder.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <section class="py-16 bg-white" id="results">
+    <div class="container mx-auto px-6">
+      <div class="max-w-5xl mx-auto">
+        <h2 class="text-3xl font-bold mb-8 text-center">
+          <span class="border-b-4 border-secondary pb-2">Results</span>
+        </h2>
+
+        <div class="paper-card p-6 rounded-xl">
+          <img src="./static/images/humaneval_line_chart.png" alt="Evaluation Results"
+            class="rounded-lg w-full h-auto shadow-md">
+          <div class="mt-4 text-gray-600">
+            <span class="font-bold text-primary">Figure 3:</span> cores assigned by human annotators for object generations of increasing complexity. For example, “2-part” refers to generating objects using two provided image-text pairs.
+          </div>
+        </div>
+
+        <div class="paper-card p-6 rounded-xl">
+          <img src="./static/images/4-part-ablations.drawio.png" alt="Evaluation Results"
+            class="rounded-lg w-full h-auto shadow-md">
+          <div class="mt-4 text-gray-600">
+            <span class="font-bold text-primary">Figure 4:</span> Some results with Chimera for 4-part compositions.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BibTeX Section -->
+  <section class="py-16 bg-gray-50" id="bibtex">
+    <div class="container mx-auto px-6">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-3xl font-bold mb-8 text-center">
+          <span class="border-b-4 border-primary pb-2">BibTeX</span>
+        </h2>
+        <div class="paper-card p-6 rounded-xl overflow-hidden">
+          <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm"><code>@article{singh2025chimera,
+    title={Chimera: Compositional Image Generation using Part-Based Concepting},
+    author={Singh, Shivam and Chen, Yiming and Chatterjee, Agneet and Raj, Amit and Hays, James and Yang, Yezhou and Baral, Chitta},
+    journal={arXiv preprint arXiv:TBD},
+    year={2025}
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 bg-dark text-white">
+    <div class="container mx-auto px-6">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <div class="flex items-center space-x-2">
+            <div
+              class="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+              <span class="text-white font-bold">C</span>
+            </div>
+            <span class="font-bold text-xl">Chimera</span>
+          </div>
+          <p class="text-gray-400 mt-2 text-sm flex flex-wrap justify-center gap-6">
+            <span>Arizona State University</span>
+            <span>Georgia Institute of Technology</span>
+            <span>Google Deepmind</span>
+          </p>
+        </div>
+
+        <div class="flex space-x-6">
+          <a href="#" class="text-gray-400 hover:text-white transition-colors">
+            <i class="fab fa-github text-xl"></i>
+          </a>
+          <a href="mailto:ssing631@asu.edu" class="text-gray-400 hover:text-white transition-colors">
+            <i class="fas fa-envelope text-xl"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+        <p>This website template is inspired by <a href="https://nerfies.github.io"
+            class="text-primary hover:underline">Nerfies</a> and modified by <a
+            href="https://github.com/bimsarapathiraja" class="text-primary hover:underline">Shivam Singh</a>.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to top button -->
+  <button id="back-to-top"
+    class="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-primary text-white shadow-lg hidden items-center justify-center">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script>
+    // Back to top button
+    const backToTopButton = document.getElementById('back-to-top');
+
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        backToTopButton.classList.remove('hidden');
+        backToTopButton.classList.add('flex');
+      } else {
+        backToTopButton.classList.add('hidden');
+        backToTopButton.classList.remove('flex');
+      }
+    });
+
+    backToTopButton.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
